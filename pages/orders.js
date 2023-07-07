@@ -29,7 +29,7 @@ export default function OrdersPage() {
 
     return (
         <Layout>
-            <h1>Orders</h1>
+            <h1>Đơn hàng</h1>
             <table className="basic">
                 <thead>
                     <tr>

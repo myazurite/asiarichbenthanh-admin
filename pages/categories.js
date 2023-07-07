@@ -140,8 +140,8 @@ function Categories({swal}) {
             <h1>Categories</h1>
             <label>
                 {editedCategory
-                    ? `Edit category ${editedCategory.name}`
-                    : 'Create new category'}
+                    ? `Chỉnh sửa ${editedCategory.name}`
+                    : 'Thêm danh mục mới'}
             </label>
             <form onSubmit={saveCategory}>
                 <div className="flex gap-1">
