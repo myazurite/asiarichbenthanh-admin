@@ -24,13 +24,11 @@ function Categories({swal}) {
     async function saveCategory(ev) {
         ev.preventDefault();
 
-        // Exclude the category currently being edited from the check
         if (editedCategory) {
             const isExisting = categories.some(
                 (category) => category._id !== editedCategory._id && category.name === name
             );
         } else {
-            // Check if name already exists for creation
             const isExisting = categories.some(
                 (category) => category.name === name
             );
@@ -85,11 +83,11 @@ function Categories({swal}) {
 
     function deleteCategory(category) {
         swal.fire({
-            title: 'Are you sure?',
-            text: `Do you want to delete ${category.name}?`,
+            title: 'Xác nhận',
+            text: `Xoá ${category.name}?`,
             showCancelButton: true,
-            cancelButtonText: 'Cancel',
-            confirmButtonText: 'Yes, delete!',
+            cancelButtonText: 'Không',
+            confirmButtonText: 'Có',
             confirmButtonColor: '#d55'
         }).then(async result => {
             if (result.isConfirmed) {
