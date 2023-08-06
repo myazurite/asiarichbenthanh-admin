@@ -1,6 +1,6 @@
 import {mongooseConnect} from "@/lib/mongoose";
 import {Category} from "@/models/Category";
-import {authOption, isAdminRequest} from "@/pages/api/auth/[...nextauth]";
+import {isAdminRequest} from "@/pages/api/auth/[...nextauth]";
 
 
 export default async function handle(req, res) {
@@ -31,7 +31,18 @@ export default async function handle(req, res) {
 
 
     if(method === 'PUT') {
-        const { _id, name, parentCategory, properties} = req.body;
+        const { _id, name, parentCategory, properties, categories} = req.body;
+
+        if (categories && Array.isArray(categories)) {
+            // Handle category sorting
+            for (let i = 0; i < categories.length; i++) {
+                const categoryId = categories[i].id;
+                await Category.updateOne(
+                    { _id: categoryId },
+                    { $set: { order: i } }
+                );
+            }
+        }
 
         const parentCategoryDoc = await Category.findOne({_id: parentCategory});
         if (parentCategoryDoc && String(parentCategoryDoc.parent) === String(_id)) {
