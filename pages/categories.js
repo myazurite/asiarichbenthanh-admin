@@ -3,6 +3,7 @@ import Layout from "@/components/Layout";
 import axios from "axios";
 import { withSwal } from "react-sweetalert2";
 import { ReactSortable } from "react-sortablejs";
+import Spinner_alt from "@/components/Spinner_alt";
 
 function Categories({ swal }) {
     const [name, setName] = useState("");
@@ -11,16 +12,19 @@ function Categories({ swal }) {
     const [editedCategory, setEditedCategory] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [properties, setProperties] = useState([]);
-    const sortableRef = useRef(null); // Ref for ReactSortable component
+    const sortableRef = useRef(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         fetchCategories();
     }, []);
 
     function fetchCategories() {
+        setIsLoading(true);
         axios.get('/api/categories').then((result) => {
             const sortedCategories = result.data.sort((a, b) => a.order - b.order);
             setCategories(sortedCategories);
+            setIsLoading(false);
         });
     }
 
@@ -251,6 +255,11 @@ function Categories({ swal }) {
                 </div>
             </form>
             {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+            {isLoading && (
+                <div className="py-4">
+                    <Spinner_alt fullWidth={true}/>
+                </div>
+            )}
             <ReactSortable
                 list={categories.map((category) => ({ id: category._id, value: category }))}
                 setList={handleSortEnd}
@@ -259,7 +268,7 @@ function Categories({ swal }) {
                 {categories.map((category) => (
                     <div
                         className="border p-2 flex justify-between"
-                        key={category._id} // Add a unique key prop to each child element
+                        key={category._id}
                     >
                         <div>{category.name}</div>
                         <div>

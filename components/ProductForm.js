@@ -3,6 +3,7 @@ import axios from "axios";
 import {useEffect, useState} from "react";
 import {ReactSortable} from "react-sortablejs";
 import Spinner from "@/components/Spinner";
+import Spinner_alt from "@/components/Spinner_alt";
 
 export default function ProductForm({
     _id,
@@ -12,35 +13,43 @@ export default function ProductForm({
     images: existingImages,
     category: assignedCategory,
     properties: assignedProperties,
+    discount: existingDiscount
 }) {
     const [title, setTitle] = useState(existingTitle || '');
     const [description, setDescription] = useState(existingDescription || '');
     const [price, setPrice] = useState(existingPrice || '');
     const [images, setImages] = useState(existingImages || []);
+    const [discount, setDiscount] = useState(existingDiscount || 0);
+    const [discountedPrice, setDiscountedPrice] = useState(existingPrice || 0);
     const [goToProducts, setGoToProducts] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const router = useRouter();
     const [categories, setCategories] = useState([]);
     const [category, setCategory] = useState(assignedCategory || '');
     const [productProperties, setProductProperties] = useState(assignedProperties || {});
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     useEffect(() => {
+        setCategoriesLoading(true);
         axios.get('/api/categories').then(result => {
             setCategories(result.data);
+            setCategoriesLoading(false);
         })
     }, []);
 
+    useEffect(() => {
+        const newDiscountedPrice = price - (price * discount) / 100;
+        setDiscountedPrice(newDiscountedPrice);
+    }, [price, discount]);
+
     async function saveProduct(ev) {
         ev.preventDefault();
-
         const propertiesToSave = [];
 
-        // Include properties from the selected category
         if (category) {
             const selectedCategory = categories.find((c) => c._id === category);
             propertiesToSave.push(...selectedCategory.properties);
 
-            // Include properties from parent categories
             let parentCategory = selectedCategory.parent;
             while (parentCategory) {
                 const parentCategoryInfo = categories.find((c) => c._id === parentCategory._id);
@@ -56,9 +65,9 @@ export default function ProductForm({
             images,
             category,
             properties: productProperties,
+            discount
         };
 
-        // Filter out properties not included in propertiesToSave
         data.properties = Object.keys(data.properties)
             .filter((prop) => propertiesToSave.some((p) => p.name === prop))
             .reduce((obj, prop) => {
@@ -67,11 +76,9 @@ export default function ProductForm({
             }, {});
 
         if (_id) {
-            // Update existing product
-            await axios.put('/api/products', { ...data, _id });
+            await axios.put("/api/products", { ...data, _id });
         } else {
-            // Create new product
-            await axios.post('/api/products', data);
+            await axios.post("/api/products", data);
         }
 
         setGoToProducts(true);
@@ -150,14 +157,17 @@ export default function ProductForm({
                     <option value={c._id} key={c._id}>{c.name}</option>
                 ))}
             </select>
+            {categoriesLoading && (
+                <Spinner_alt fullWidth={true}/>
+            )}
             {propertiesToFill.length > 0 && propertiesToFill.map(p => (
                 <div className="flex gap-1" key={p._id}>
-                    <div className="">{p.name}</div>
+                    <div className="w-20 flex items-center justify-center mb-2">{p.name}</div>
                     <select
                         value={productProperties[p.name]}
                         onChange={ev => setProductProp(p.name, ev.target.value)}
                     >
-                        <option value="0" >Chọn thuộc tính</option>
+                        <option value="0">Chọn thuộc tính</option>
                         {p.values.map((v, i) => (
                             <option value={v} key={i}>{v}</option>
                         ))}
@@ -210,13 +220,27 @@ export default function ProductForm({
                 value={description}
                 onChange={ev => setDescription(ev.target.value)}
             ></textarea>
-            <label>Giá</label>
+            <label>Giá gốc</label>
             <input
                 type="number"
                 placeholder="Đơn giá sản phẩm"
                 value={price}
                 onChange={ev => setPrice(ev.target.value)}
                 required
+            />
+            <label>Giảm giá (%)</label>
+            <input
+                type="number"
+                placeholder="Giảm giá (%)"
+                value={discount}
+                onChange={(ev) => setDiscount(ev.target.value)}
+            />
+            <label>Giá sau khi giảm</label>
+            <input
+                type="number"
+                placeholder="Giá sau khi giảm"
+                value={discountedPrice}
+                readOnly
             />
             <button type='submit' className="btn-primary">Lưu</button>
         </form>
