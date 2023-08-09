@@ -8,6 +8,16 @@ export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [products, setProducts] = useState([]);
+    const [productsLoading, setProductsLoading] = useState(false);
+
+    useEffect(() => {
+        setProductsLoading(true);
+        axios.get("/api/products").then(res => {
+            setProducts(res.data);
+            setProductsLoading(false);
+        });
+    }, []);
 
     const handleEditClick = (orderId) => {
         const order = orders.find((order) => order._id === orderId);
@@ -52,12 +62,15 @@ export default function OrdersPage() {
                     <th>tên khách hàng</th>
                     <th>địa chỉ</th>
                     <th>Số điện thoại</th>
-                    {/*<th>Sản phẩm</th>*/}
+                    <th>Sản phẩm</th>
                     {/*<th>tổng hoá đơn</th>*/}
                     <th></th>
                 </tr>
                 </thead>
                 <tbody>
+                {productsLoading && (
+                    <Spinner_alt fullWidth={true}/>
+                )}
                 {isLoading && (
                     <tr>
                         <td colSpan={10}>
@@ -68,9 +81,9 @@ export default function OrdersPage() {
                     </tr>
                 )}
                 {orders.length > 0 && orders.map(order => (
-                    <tr key={order._id}>
+                    <tr key={order.orderId}>
                         {/*<td>{(new Date(order.createdAt)).toLocaleString()}</td>*/}
-                        <td>{order._id}</td>
+                        <td>{order.orderId}</td>
                         <td className={order.paid ? 'text-green-600' : 'text-red-600'}>
                             <div className="flex items-center">
                                 {order.paid ? 'YES' : 'NO'}
@@ -81,14 +94,14 @@ export default function OrdersPage() {
                         <td>{order.name}</td>
                         <td>{order.address}</td>
                         <td>{order.phone}</td>
-                        {/*<td>*/}
-                        {/*    {order.line_items.map(l => (*/}
-                        {/*        <>*/}
-                        {/*            {l.name} x*/}
-                        {/*            {l.quantity}<br />*/}
-                        {/*        </>*/}
-                        {/*    ))}*/}
-                        {/*</td>*/}
+                        <td>
+                            {order.line_items.map(l => (
+                                <>
+                                    {l.name} x
+                                    {l.quantity}<br />
+                                </>
+                            ))}
+                        </td>
                         {/*<td>{formatNumber(order.total_price)} ₫</td>*/}
                         <td>
                             <button onClick={() => handleEditClick(order._id)}>Chi tiết</button>
@@ -98,7 +111,7 @@ export default function OrdersPage() {
                 </tbody>
             </table>
             {selectedOrder && (
-                <EditOrderModal isOpen={true} onClose={handleCloseModal} order={selectedOrder}/>
+                <EditOrderModal isOpen={true} onClose={handleCloseModal} order={selectedOrder} products={products}/>
             )}
         </Layout>
     );

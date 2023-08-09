@@ -16,6 +16,7 @@ const OrderSchema = new Schema({
     phone: String,
     total_price: Number,
     paid: Boolean,
+    orderId: String
 }, {
     timestamps: true,
 });

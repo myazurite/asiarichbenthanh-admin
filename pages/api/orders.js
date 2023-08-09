@@ -9,15 +9,19 @@ export default async function handler(req, res) {
         res.json(orders);
     } else if (req.method === 'PUT') {
         const { orderId, paid } = req.body;
+        console.log(req.body)
 
         const order = await Order.findById(orderId);
+        console.log(order)
         if (!order) {
             res.status(404).json({ message: 'Order not found.' });
             return;
         }
 
         order.paid = paid;
+        // console.log(order, 'before')
         await order.save();
+        // console.log(order, 'after')
 
         res.json({ message: 'Order updated.' });
     } else {

@@ -62,11 +62,10 @@ function Categories({ swal }) {
             setErrorMessage("");
             setName("");
             setParentCategory("");
-            setEditedCategory(null); // This will reset the form to the "create" state
+            setEditedCategory(null);
             setProperties([]);
             fetchCategories();
         } catch (err) {
-            // Handle error response from server
             if (err.response && err.response.data && err.response.data.error) {
                 setErrorMessage(err.response.data.error);
             } else {
