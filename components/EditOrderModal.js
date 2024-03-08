@@ -46,7 +46,7 @@ const EditOrderModal = ({ isOpen, onClose, order, products }) => {
     function calculateTotalPrice() {
         let total = 0;
         editedLineItems.forEach((item) => {
-            total += item.quantity * item.price_data.unit_amount;
+            total += item.quantity * item.price_data.discountedPrice;
         });
         return total;
     }
